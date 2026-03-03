@@ -27,6 +27,13 @@
       default = copilot-api;
     });
 
+    checks = eachSystem (system: {
+      module-test = pkgsFor.${system}.callPackage ./test.nix {
+        inherit self;
+        bun2nix-overlay = bun2nix.overlays.default;
+      };
+    });
+
     overlays.default = final: prev: {
       copilot-api = (final.extend bun2nix.overlays.default).callPackage ./package.nix {};
     };
