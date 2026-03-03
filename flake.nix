@@ -2,7 +2,7 @@
   description = "GitHub Copilot as OpenAI/Anthropic-compatible API server";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
     bun2nix = {
       url = "github:nix-community/bun2nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -10,6 +10,7 @@
   };
 
   outputs = {
+    self,
     nixpkgs,
     bun2nix,
     ...
@@ -28,6 +29,11 @@
 
     overlays.default = final: prev: {
       copilot-api = (final.extend bun2nix.overlays.default).callPackage ./package.nix {};
+    };
+
+    nixosModules = {
+      copilot-api = import ./module.nix;
+      default = self.nixosModules.copilot-api;
     };
   };
 }
