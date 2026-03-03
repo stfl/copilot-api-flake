@@ -1,7 +1,7 @@
 NixOS flake for copilot-api
 ---
 
-Nix flake for [copilot-api](https://github.com/ericc-ch/copilot-api) — a server that exposes GitHub Copilot as an OpenAI/Anthropic-compatible API.
+Nix flake for [copilot-api](https://github.com/caozhiyuan/copilot-api) (fork of [ericc-ch/copilot-api](https://github.com/ericc-ch/copilot-api)) — a server that exposes GitHub Copilot as an OpenAI/Anthropic-compatible API.
 
 ## Usage
 
@@ -59,14 +59,15 @@ Follow the device-code flow, then place the resulting token in the file referenc
 
 ### Settings reference
 
-| Option        | Type        | Default        | Description                               |
-|---------------|-------------|----------------|-------------------------------------------|
-| `port`        | int         | `4141`         | Port to listen on                         |
-| `verbose`     | bool        | `false`        | Verbose logging                           |
-| `accountType` | enum        | `"individual"` | `individual`, `business`, or `enterprise` |
-| `manual`      | bool        | `false`        | Manual request approval                   |
-| `rateLimit`   | null or int | `null`         | Rate limit in seconds                     |
-| `wait`        | bool        | `false`        | Wait on rate limit instead of error       |
-| `claudeCode`  | bool        | `false`        | Claude Code mode                          |
-| `showToken`   | bool        | `false`        | Show tokens on fetch/refresh              |
-| `proxyEnv`    | bool        | `false`        | Init proxy from env vars                  |
+| Option          | Type        | Default          | Description                               |
+|-----------------|-------------|------------------|-------------------------------------------|
+| `listenAddress` | str         | `"127.0.0.1"`   | Address to bind to (localhost by default) |
+| `port`          | int         | `4141`           | Port to listen on                         |
+| `verbose`       | bool        | `false`          | Verbose logging                           |
+| `accountType`   | enum        | `"individual"`   | `individual`, `business`, or `enterprise` |
+| `manual`        | bool        | `false`          | Manual request approval                   |
+| `rateLimit`     | null or int | `null`           | Rate limit in seconds                     |
+| `wait`          | bool        | `false`          | Wait on rate limit instead of error       |
+| `claudeCode`    | bool        | `false`          | Claude Code mode                          |
+| `showToken`     | bool        | `false`          | Show tokens on fetch/refresh              |
+| `proxyEnv`      | bool        | `false`          | Init proxy from env vars                  |

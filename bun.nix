@@ -11,7 +11,8 @@
   fetchgit,
   fetchurl,
   ...
-}: {
+}:
+{
   "@altano/repository-tools@2.0.1" = fetchurl {
     url = "https://registry.npmjs.org/@altano/repository-tools/-/repository-tools-2.0.1.tgz";
     hash = "sha512-YE/52CkFtb+YtHPgbWPai7oo5N9AKnMuP5LM+i2AG7G1H2jdYBCO1iDnkDE3dZ3C1MIgckaF+d5PNRulgt0bdw==";

@@ -8,12 +8,12 @@
   makeWrapper,
 }: let
   src = fetchFromGitHub {
-    owner = "ericc-ch";
+    owner = "caozhiyuan";
     repo = "copilot-api";
     rev = "v${version}";
-    hash = "sha256-rUUqf9QalVZDN3aw9ze5Uh+y5xvH6zdSgGN6ZLDjkDQ="; # src
+    hash = "sha256-OWMAY549n07WjttkRKYhnm6UwB/90Q0g8nyGmob1kIY="; # src
   };
-  version = "0.7.0";
+  version = "1.1.8";
 in
   stdenv.mkDerivation {
     pname = "copilot-api";
@@ -45,7 +45,7 @@ in
 
     meta = {
       description = "GitHub Copilot as OpenAI/Anthropic-compatible API";
-      homepage = "https://github.com/ericc-ch/copilot-api";
+      homepage = "https://github.com/caozhiyuan/copilot-api";
       license = lib.licenses.mit;
       mainProgram = "copilot-api";
     };
