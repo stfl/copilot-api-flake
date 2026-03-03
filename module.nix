@@ -176,7 +176,7 @@ in {
         in
           toString (pkgs.writeShellScript "copilot-api-start" ''
             mkdir -p "$HOME/.local/share/copilot-api"
-            cp ${configFile} "$HOME/.local/share/copilot-api/config.json"
+            install -m 0600 ${configFile} "$HOME/.local/share/copilot-api/config.json"
             exec ${lib.getExe cfg.package} ${escapedArgs} \
               ${lib.optionalString (cfg.githubTokenFile != null) ''--github-token "$(cat "$CREDENTIALS_DIRECTORY/github-token")"''}
           '');
