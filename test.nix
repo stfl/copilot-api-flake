@@ -38,6 +38,11 @@ pkgs.testers.nixosTest {
     # Token flag is present in the wrapper script
     machine.succeed("systemctl cat copilot-api.service | grep github-token")
 
+    # Listen address is set in the unit file
+    machine.succeed("systemctl cat copilot-api.service | grep 'HOST=127.0.0.1'")
+    # And is reflected in the effective unit environment
+    machine.succeed("systemctl show copilot-api.service --property=Environment | grep 'HOST=127.0.0.1'")
+
     # Service attempted to start and failed at token exchange, not at filesystem/config errors
     machine.succeed("journalctl -u copilot-api.service | grep -i 'github\\|token\\|fetch'")
     machine.fail("journalctl -u copilot-api.service | grep -i 'ENOENT\\|no such file'")

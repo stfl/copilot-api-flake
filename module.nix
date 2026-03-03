@@ -30,6 +30,12 @@ in {
     };
 
     settings = {
+      listenAddress = lib.mkOption {
+        type = lib.types.str;
+        default = "127.0.0.1";
+        description = "Address to listen on. Defaults to localhost only.";
+      };
+
       port = lib.mkOption {
         type = lib.types.port;
         default = 4141;
@@ -109,7 +115,10 @@ in {
           '');
 
         StateDirectory = "copilot-api";
-        Environment = "HOME=%S/copilot-api";
+        Environment = [
+          "HOME=%S/copilot-api"
+          "HOST=${cfg.settings.listenAddress}"
+        ];
 
         Restart = "on-failure";
         RestartSec = 5;
