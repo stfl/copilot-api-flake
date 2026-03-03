@@ -168,19 +168,14 @@ in {
         Type = "simple";
         DynamicUser = true;
 
-        # The Nix-generated config is always loaded as a credential so systemd
-        # delivers it before the process starts.  The GitHub token credential
-        # is optional and only added when githubTokenFile is set.
-        LoadCredential =
-          ["copilot-api-config:${configFile}"]
-          ++ lib.optional (cfg.githubTokenFile != null)
-            "github-token:${cfg.githubTokenFile}";
+        LoadCredential = lib.optional (cfg.githubTokenFile != null)
+          "github-token:${cfg.githubTokenFile}";
 
         ExecStart = let
           escapedArgs = lib.escapeShellArgs args;
         in
           toString (pkgs.writeShellScript "copilot-api-start" ''
-            cp "$CREDENTIALS_DIRECTORY/copilot-api-config" /var/lib/copilot-api/config.json
+            cp ${configFile} "$COPILOT_API_HOME/config.json"
             exec ${lib.getExe cfg.package} ${escapedArgs} \
               ${lib.optionalString (cfg.githubTokenFile != null) ''--github-token "$(cat "$CREDENTIALS_DIRECTORY/github-token")"''}
           '');
