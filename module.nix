@@ -108,6 +108,9 @@ in {
               ${lib.optionalString (cfg.githubTokenFile != null) ''--github-token "$(cat "$CREDENTIALS_DIRECTORY/github-token")"''}
           '');
 
+        StateDirectory = "copilot-api";
+        Environment = "HOME=%S/copilot-api";
+
         Restart = "on-failure";
         RestartSec = 5;
 

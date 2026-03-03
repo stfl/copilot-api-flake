@@ -38,7 +38,8 @@ pkgs.testers.nixosTest {
     # Token flag is present in the wrapper script
     machine.succeed("systemctl cat copilot-api.service | grep github-token")
 
-    # Service attempted to start (fails at token exchange, not misconfiguration)
-    machine.succeed("journalctl -u copilot-api.service | grep -i 'github\\|token\\|error'")
+    # Service attempted to start and failed at token exchange, not at filesystem/config errors
+    machine.succeed("journalctl -u copilot-api.service | grep -i 'github\\|token\\|fetch'")
+    machine.fail("journalctl -u copilot-api.service | grep -i 'ENOENT\\|no such file'")
   '';
 }
