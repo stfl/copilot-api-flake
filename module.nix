@@ -12,7 +12,7 @@
     lib.mapAttrs (_: v: if lib.isAttrs v then removeNulls v else v)
     (lib.filterAttrs (_: v: v != null) attrs);
 
-  # Build the config.json written to $COPILOT_API_HOME on service start.
+  # Build the config.json written to $HOME/.local/share/copilot-api on service start.
   # Fields that are null (unset) or empty attrsets are omitted entirely so the
   # app falls back to its own defaults.
   configFile = pkgs.writeText "copilot-api-config.json" (builtins.toJSON (removeNulls {
@@ -175,16 +175,16 @@ in {
           escapedArgs = lib.escapeShellArgs args;
         in
           toString (pkgs.writeShellScript "copilot-api-start" ''
-            cp ${configFile} "$COPILOT_API_HOME/config.json"
+            mkdir -p "$HOME/.local/share/copilot-api"
+            cp ${configFile} "$HOME/.local/share/copilot-api/config.json"
             exec ${lib.getExe cfg.package} ${escapedArgs} \
               ${lib.optionalString (cfg.githubTokenFile != null) ''--github-token "$(cat "$CREDENTIALS_DIRECTORY/github-token")"''}
           '');
 
-        StateDirectory = "copilot-api";
+        RuntimeDirectory = "copilot-api";
         Environment = [
-          "HOME=%S/copilot-api"
+          "HOME=/run/copilot-api"
           "HOST=${cfg.settings.listenAddress}"
-          "COPILOT_API_HOME=%S/copilot-api"
         ];
 
         Restart = "on-failure";

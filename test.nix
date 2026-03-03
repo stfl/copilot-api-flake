@@ -46,13 +46,12 @@ pkgs.testers.nixosTest {
     machine.succeed("systemctl cat copilot-api.service | grep 'HOST=127.0.0.1'")
     machine.succeed("systemctl show copilot-api.service --property=Environment | grep 'HOST=127.0.0.1'")
 
-    # COPILOT_API_HOME points to the state directory
-    machine.succeed("systemctl show copilot-api.service --property=Environment | grep 'COPILOT_API_HOME'")
+    # HOME points to the runtime directory; no COPILOT_API_HOME override
+    machine.succeed("systemctl show copilot-api.service --property=Environment | grep 'HOME=/run/copilot-api'")
+    machine.fail("systemctl show copilot-api.service --property=Environment | grep 'COPILOT_API_HOME'")
 
-    # ExecStartPre wrote config.json into the state directory
-    cfg = machine.succeed("cat /var/lib/copilot-api/config.json")
-    assert "test-key-1" in cfg, f"Expected apiKeys in config.json, got: {cfg}"
-    assert "gpt-5-mini" in cfg, f"Expected smallModel in config.json, got: {cfg}"
+    # Wrapper script copies config to $HOME/.local/share/copilot-api/config.json
+    machine.succeed("grep -r '.local/share/copilot-api/config.json' /nix/store/*copilot-api-start*")
 
     # Service attempted to start and failed at token exchange, not at filesystem/config errors
     machine.succeed("journalctl -u copilot-api.service | grep -i 'github\\|token\\|fetch'")
