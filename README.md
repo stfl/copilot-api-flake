@@ -59,15 +59,28 @@ Follow the device-code flow, then place the resulting token in the file referenc
 
 ### Settings reference
 
-| Option          | Type        | Default          | Description                               |
-|-----------------|-------------|------------------|-------------------------------------------|
-| `listenAddress` | str         | `"127.0.0.1"`   | Address to bind to (localhost by default) |
-| `port`          | int         | `4141`           | Port to listen on                         |
-| `verbose`       | bool        | `false`          | Verbose logging                           |
-| `accountType`   | enum        | `"individual"`   | `individual`, `business`, or `enterprise` |
-| `manual`        | bool        | `false`          | Manual request approval                   |
-| `rateLimit`     | null or int | `null`           | Rate limit in seconds                     |
-| `wait`          | bool        | `false`          | Wait on rate limit instead of error       |
-| `claudeCode`    | bool        | `false`          | Claude Code mode                          |
-| `showToken`     | bool        | `false`          | Show tokens on fetch/refresh              |
-| `proxyEnv`      | bool        | `false`          | Init proxy from env vars                  |
+**CLI-mapped options** (`settings.*`):
+
+| Option          | Type        | Default         | Description                               |
+|-----------------|-------------|-----------------|-------------------------------------------|
+| `listenAddress` | str         | `"127.0.0.1"`  | Address to bind to (localhost by default) |
+| `port`          | int         | `4141`          | Port to listen on                         |
+| `verbose`       | bool        | `false`         | Verbose logging                           |
+| `accountType`   | enum        | `"individual"`  | `individual`, `business`, or `enterprise` |
+| `manual`        | bool        | `false`         | Manual request approval                   |
+| `rateLimit`     | null or int | `null`          | Rate limit in seconds                     |
+| `wait`          | bool        | `false`         | Wait on rate limit instead of error       |
+| `claudeCode`    | bool        | `false`         | Claude Code mode                          |
+| `showToken`     | bool        | `false`         | Show tokens on fetch/refresh              |
+| `proxyEnv`      | bool        | `false`         | Init proxy from env vars                  |
+
+**JSON config options** (`settings.apiConfig.*`), written to `$COPILOT_API_HOME/config.json`:
+
+| Option                  | Type              | Default       | Description                                               |
+|-------------------------|-------------------|---------------|-----------------------------------------------------------|
+| `apiKeys`               | list of str       | `[]`          | Client API keys. Empty list disables authentication.      |
+| `smallModel`            | null or str       | `null`        | Model for fast tasks (app default: `gpt-5-mini`)          |
+| `modelReasoningEfforts` | attrs of enum     | `{}`          | Reasoning effort per model: `low`, `medium`, or `high`    |
+| `useFunctionApplyPatch` | null or bool      | `null`        | Use function apply patch (app default: `true`)            |
+| `compactUseSmallModel`  | null or bool      | `null`        | Use small model for compact ops (app default: `true`)     |
+| `extraPrompts`          | attrs of str      | `{}`          | Extra system prompts per model ID                         |

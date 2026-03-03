@@ -6,6 +6,30 @@
 }: let
   cfg = config.services.copilot-api;
 
+  # Generic helper: recursively remove null values from an attrset so that
+  # unset optional fields are omitted from the generated JSON.
+  removeNulls = attrs:
+    lib.mapAttrs (_: v: if lib.isAttrs v then removeNulls v else v)
+    (lib.filterAttrs (_: v: v != null) attrs);
+
+  # Build the config.json written to $COPILOT_API_HOME on service start.
+  # Fields that are null (unset) or empty attrsets are omitted entirely so the
+  # app falls back to its own defaults.
+  configFile = pkgs.writeText "copilot-api-config.json" (builtins.toJSON (removeNulls {
+    auth.apiKeys = cfg.settings.apiConfig.apiKeys;
+    smallModel = cfg.settings.apiConfig.smallModel;
+    modelReasoningEfforts =
+      if cfg.settings.apiConfig.modelReasoningEfforts != {}
+      then cfg.settings.apiConfig.modelReasoningEfforts
+      else null;
+    useFunctionApplyPatch = cfg.settings.apiConfig.useFunctionApplyPatch;
+    compactUseSmallModel = cfg.settings.apiConfig.compactUseSmallModel;
+    extraPrompts =
+      if cfg.settings.apiConfig.extraPrompts != {}
+      then cfg.settings.apiConfig.extraPrompts
+      else null;
+  }));
+
   args =
     ["start"]
     ++ ["--port" (toString cfg.settings.port)]
@@ -89,6 +113,47 @@ in {
         default = false;
         description = "Initialize proxy from environment variables.";
       };
+
+      # Options that map to the JSON config file read by the application.
+      # These are distinct from CLI flags: the app merges both sources.
+      apiConfig = {
+        apiKeys = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          description = "API keys clients must supply via x-api-key or Authorization: Bearer. Empty list disables authentication.";
+        };
+
+        smallModel = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Model used for small/fast tasks. Defaults to gpt-5-mini.";
+        };
+
+        modelReasoningEfforts = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.enum ["low" "medium" "high"]);
+          default = {};
+          description = "Reasoning effort level per model ID.";
+          example = {"gpt-5-mini" = "low";};
+        };
+
+        useFunctionApplyPatch = lib.mkOption {
+          type = lib.types.nullOr lib.types.bool;
+          default = null;
+          description = "Use function apply patch. Defaults to true.";
+        };
+
+        compactUseSmallModel = lib.mkOption {
+          type = lib.types.nullOr lib.types.bool;
+          default = null;
+          description = "Use small model for compact operations. Defaults to true.";
+        };
+
+        extraPrompts = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          default = {};
+          description = "Extra system prompts per model ID, merged with the application defaults.";
+        };
+      };
     };
   };
 
@@ -106,6 +171,10 @@ in {
         LoadCredential = lib.mkIf (cfg.githubTokenFile != null)
           "github-token:${cfg.githubTokenFile}";
 
+        # Deploy the Nix-generated config into the writable state directory
+        # before the main process starts.
+        ExecStartPre = "${pkgs.coreutils}/bin/cp ${configFile} /var/lib/copilot-api/config.json";
+
         ExecStart = let
           escapedArgs = lib.escapeShellArgs args;
         in
@@ -118,6 +187,7 @@ in {
         Environment = [
           "HOME=%S/copilot-api"
           "HOST=${cfg.settings.listenAddress}"
+          "COPILOT_API_HOME=%S/copilot-api"
         ];
 
         Restart = "on-failure";

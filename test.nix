@@ -19,6 +19,11 @@ pkgs.testers.nixosTest {
     services.copilot-api = {
       enable = true;
       githubTokenFile = "/etc/copilot-api-token";
+      settings.apiConfig = {
+        apiKeys = ["test-key-1" "test-key-2"];
+        smallModel = "gpt-5-mini";
+        modelReasoningEfforts = {"gpt-5-mini" = "low";};
+      };
     };
   };
 
@@ -38,10 +43,17 @@ pkgs.testers.nixosTest {
     # Token flag is present in the wrapper script
     machine.succeed("systemctl cat copilot-api.service | grep github-token")
 
-    # Listen address is set in the unit file
+    # Listen address is set in the unit file and effective environment
     machine.succeed("systemctl cat copilot-api.service | grep 'HOST=127.0.0.1'")
-    # And is reflected in the effective unit environment
     machine.succeed("systemctl show copilot-api.service --property=Environment | grep 'HOST=127.0.0.1'")
+
+    # COPILOT_API_HOME points to the state directory
+    machine.succeed("systemctl show copilot-api.service --property=Environment | grep 'COPILOT_API_HOME'")
+
+    # ExecStartPre wrote config.json into the state directory
+    cfg = machine.succeed("cat /var/lib/copilot-api/config.json")
+    assert "test-key-1" in cfg, f"Expected apiKeys in config.json, got: {cfg}"
+    assert "gpt-5-mini" in cfg, f"Expected smallModel in config.json, got: {cfg}"
 
     # Service attempted to start and failed at token exchange, not at filesystem/config errors
     machine.succeed("journalctl -u copilot-api.service | grep -i 'github\\|token\\|fetch'")
