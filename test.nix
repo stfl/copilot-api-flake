@@ -37,11 +37,9 @@ pkgs.testers.nixosTest {
     # Service is enabled
     machine.succeed("systemctl is-enabled copilot-api.service")
 
-    # LoadCredential is wired in the unit
-    machine.succeed("systemctl cat copilot-api.service | grep LoadCredential")
-
-    # Token flag is present in the wrapper script
-    machine.succeed("systemctl cat copilot-api.service | grep github-token")
+    # Both credentials are wired in the unit
+    machine.succeed("systemctl cat copilot-api.service | grep 'copilot-api-config'")
+    machine.succeed("systemctl cat copilot-api.service | grep 'github-token'")
 
     # Listen address is set in the unit file and effective environment
     machine.succeed("systemctl cat copilot-api.service | grep 'HOST=127.0.0.1'")
